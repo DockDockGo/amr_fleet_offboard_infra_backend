@@ -55,7 +55,7 @@ class WorkCellState(models.Model):
 
 
 class AMRState(models.Model):
-    amr_id = models.CharField(max_length=20, choices=[(tag, tag.value) for tag in AMR])
+    amr_id = models.CharField(max_length=20, choices=[(tag, tag.value) for tag in AMR], null=True, blank=True)
     active_mission = models.OneToOneField(
         "AMRMission", on_delete=models.PROTECT, null=True, blank=True
     )
@@ -126,7 +126,7 @@ class TestbedTask(Task):
 
 
 class AMRMission(Task):
-    amr_id = models.CharField(max_length=20, choices=[(tag, tag.value) for tag in AMR])
+    amr_id = models.CharField(max_length=20, choices=[(tag, tag.value) for tag in AMR], null=True, blank=True)
     start = models.CharField(
         max_length=20, choices=[(tag, tag.value) for tag in WorkCell]
     )
