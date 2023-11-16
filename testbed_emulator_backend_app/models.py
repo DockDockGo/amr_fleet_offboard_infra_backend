@@ -17,6 +17,7 @@ from django.db.models import Q
 #     RUNNING = 3
 #     COMPLETED = 4
 #     FAILED = 5
+#     CANCELED = 6
 
 
 # # An AMR is an autonomous mobile robot. We currently have the following 2 robots at the testbed
