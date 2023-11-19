@@ -1,13 +1,23 @@
 from rest_framework import serializers
-from .models import AssemblyWorkflow, TestbedTask, MaterialTransportTaskChain, AMRMission
+from .models import AssemblyWorkflow, TestbedTask, MaterialTransportTaskChain, AMRMission, WorkCellState, AMRState, TestbedTask, MaterialTransportTaskChain
 from .testbed_config import WorkCell, TaskStatus, AMR, ASSEMBLY_WORKFLOW_PRESET
 
-class AssemblyWorkflowSerializer(serializers.ModelSerializer):
+class AssemblyWorkflowSerializer(serializers.HyperlinkedModelSerializer):
     model_assembly_type_id = serializers.IntegerField()
 
     class Meta:
         model = AssemblyWorkflow
-        fields = ['id', 'model_assembly_type_id']
+        fields = '__all__'
+        extra_kwargs = {
+            'url': {'view_name': 'assemblyworkflow-detail', 'lookup_field': 'pk'},
+            'fetch_parts_bins': {'view_name': 'testbedtask-detail', 'lookup_field': 'pk'},
+            'transport_parts_bins_to_kitting_station': {'view_name': 'materialtransporttaskchain-detail', 'lookup_field': 'pk'},
+            'kitting_task': {'view_name': 'testbedtask-detail', 'lookup_field': 'pk'},
+            'transport_kitting_task_payload_to_assembly_station': {'view_name': 'materialtransporttaskchain-detail', 'lookup_field': 'pk'},
+            'assembly_task': {'view_name': 'testbedtask-detail', 'lookup_field': 'pk'},
+            'transport_assembly_task_payload_to_qa_station': {'view_name': 'materialtransporttaskchain-detail', 'lookup_field': 'pk'}
+            # Add other FK fields as URLs if needed
+        }
 
     def create(self, validated_data):
         preset = ASSEMBLY_WORKFLOW_PRESET
@@ -65,5 +75,87 @@ class AssemblyWorkflowSerializer(serializers.ModelSerializer):
             navigate_to_sink_subtask=navigate_to_sink_subtask,
             unloading_subtask=unloading_subtask
         )
+
+        # Set the material_transport_task_chain_id for each task
+        navigate_to_source_subtask.material_transport_task_chain_id = material_transport_task_chain.id
+        loading_subtask.material_transport_task_chain_id = material_transport_task_chain.id
+        navigate_to_sink_subtask.material_transport_task_chain_id = material_transport_task_chain.id
+        unloading_subtask.material_transport_task_chain_id = material_transport_task_chain.id
+
+        # Don't forget to save these objects after updating them
+        navigate_to_source_subtask.save()
+        loading_subtask.save()
+        navigate_to_sink_subtask.save()
+        unloading_subtask.save()
         
         return material_transport_task_chain
+
+
+class WorkCellStateSerializer(serializers.HyperlinkedModelSerializer):
+    workcell_id = serializers.CharField()
+    docked_amr_id = serializers.CharField()
+
+    class Meta:
+        model = WorkCellState
+        fields = '__all__'
+        extra_kwargs = {
+            'url': {'view_name': 'workcellstate-detail', 'lookup_field': 'pk'},
+            'active_task': {'view_name': 'testbedtask-detail', 'lookup_field': 'pk'}
+            # Add other FK fields here if needed
+        }
+
+
+class AMRStateSerializer(serializers.HyperlinkedModelSerializer):
+    amr_id = serializers.CharField()
+
+    class Meta:
+        model = AMRState
+        fields = '__all__'
+        extra_kwargs = {
+            'url': {'view_name': 'amrstate-detail', 'lookup_field': 'pk'},
+            'active_mission': {'view_name': 'amrmission-detail', 'lookup_field': 'pk'}
+        }
+
+class TestbedTaskSerializer(serializers.HyperlinkedModelSerializer):
+    status = serializers.CharField()
+    assembly_workflow_id = serializers.IntegerField(allow_null=True, required=False)
+    workcell_id = serializers.CharField()
+    material_transport_task_chain_id = serializers.IntegerField(allow_null=True, required=False)
+
+
+    class Meta:
+        model = TestbedTask
+        fields = '__all__'
+        extra_kwargs = {
+            'url': {'view_name': 'testbedtask-detail', 'lookup_field': 'pk'}
+            # Add other FK fields here if needed
+        }
+
+class AMRMissionSerializer(serializers.HyperlinkedModelSerializer):
+    amr_id = serializers.IntegerField(allow_null=True, required=False)
+    assembly_workflow_id = serializers.IntegerField(allow_null=True, required=False)
+    start = serializers.IntegerField()
+    goal = serializers.IntegerField()
+    status = serializers.IntegerField()
+    material_transport_task_chain_id = serializers.IntegerField(allow_null=True, required=False)
+    
+    class Meta:
+        model = AMRMission
+        fields = '__all__'
+        extra_kwargs = {
+            'url': {'view_name': 'amrmission-detail', 'lookup_field': 'pk'},
+            # Add other FK fields as URLs if needed
+            # For example:
+            # 'amr_id': {'view_name': 'amrstate-detail', 'lookup_field': 'pk'}
+        }
+
+class MaterialTransportTaskChainSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = MaterialTransportTaskChain
+        fields = '__all__'
+        extra_kwargs = {
+            'url': {'view_name': 'materialtransporttaskchain-detail', 'lookup_field': 'pk'},
+            'navigate_to_source_subtask': {'view_name': 'amrmission-detail', 'lookup_field': 'pk'},
+            'loading_subtask': {'view_name': 'testbedtask-detail', 'lookup_field': 'pk'},
+            # Continue for other FK fields
+        }

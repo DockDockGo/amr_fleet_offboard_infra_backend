@@ -2,14 +2,13 @@ from enum import Enum
 
 FLEET_INFRA_IP_AND_PORT = "0.0.0.0:5001"
 
-
 # A work cell is a physical location in the factory where a robot can be assigned to perform a task
 class WorkCell(Enum):
-    STOCK_ROOM = 1
-    KITTING_STATION = 2
-    ASSEMBLY_STATION_1 = 3
-    ASSEMBLY_STATION_2 = 4
-    QA_STATION = 5
+    UNDEFINED = 0
+    STOCK_ROOM = 3
+    KITTING_STATION = 6
+    ASSEMBLY_STATION = 1
+    QA_STATION = 2
 
 
 class TaskStatus(Enum):
@@ -27,16 +26,6 @@ class AMR(Enum):
     MORTY = 2
 
 
-# Dictionary mapping workcell to int type dock ids
-# For now, we use the same fiducial marker id as the dock id
-WORKCELL_TO_DOCK_IDS = {
-    WorkCell.STOCK_ROOM: 1,
-    WorkCell.KITTING_STATION: 2,
-    WorkCell.ASSEMBLY_STATION_1: 3,
-    WorkCell.ASSEMBLY_STATION_2: 4,
-    WorkCell.QA_STATION: 5,
-}
-
 ASSEMBLY_WORKFLOW_PRESET = {
     'fetch_parts_bins': {
         'workcell_id': WorkCell.STOCK_ROOM.value,
@@ -45,7 +34,7 @@ ASSEMBLY_WORKFLOW_PRESET = {
     'transport_parts_bins_to_kitting_station': {
         'navigate_to_source_subtask': {
             'amr_id': None,
-            'start': WorkCell.STOCK_ROOM.value,
+            'start': WorkCell.UNDEFINED.value,
             'goal': WorkCell.STOCK_ROOM.value,
             'status': TaskStatus.BACKLOG.value,
         },
@@ -71,7 +60,7 @@ ASSEMBLY_WORKFLOW_PRESET = {
     'transport_kitting_task_payload_to_assembly_station': {
         'navigate_to_source_subtask': {
             'amr_id': None,
-            'start': WorkCell.KITTING_STATION.value,
+            'start': WorkCell.UNDEFINED.value,
             'goal': WorkCell.KITTING_STATION.value,
             'status': TaskStatus.BACKLOG.value,
         },
@@ -82,32 +71,32 @@ ASSEMBLY_WORKFLOW_PRESET = {
         'navigate_to_sink_subtask': {
             'amr_id': None,
             'start': WorkCell.KITTING_STATION.value,
-            'goal': WorkCell.ASSEMBLY_STATION_1.value,
+            'goal': WorkCell.ASSEMBLY_STATION.value,
             'status': TaskStatus.BACKLOG.value,
         },
         'unloading_subtask': {
-            'workcell_id': WorkCell.ASSEMBLY_STATION_1.value,
+            'workcell_id': WorkCell.ASSEMBLY_STATION.value,
             'status': TaskStatus.BACKLOG.value,
         },
     },
     'assembly_task': {
-        'workcell_id': WorkCell.ASSEMBLY_STATION_1.value,
+        'workcell_id': WorkCell.ASSEMBLY_STATION.value,
         'status': TaskStatus.BACKLOG.value,
     },
     'transport_assembly_task_payload_to_qa_station': {
         'navigate_to_source_subtask': {
             'amr_id': None,
-            'start': WorkCell.ASSEMBLY_STATION_1.value,
-            'goal': WorkCell.ASSEMBLY_STATION_1.value,
+            'start': WorkCell.UNDEFINED.value,
+            'goal': WorkCell.ASSEMBLY_STATION.value,
             'status': TaskStatus.BACKLOG.value,
         },
         'loading_subtask': {
-            'workcell_id': WorkCell.ASSEMBLY_STATION_1.value,
+            'workcell_id': WorkCell.ASSEMBLY_STATION.value,
             'status': TaskStatus.BACKLOG.value,
         },
         'navigate_to_sink_subtask': {
             'amr_id': None,
-            'start': WorkCell.ASSEMBLY_STATION_1.value,
+            'start': WorkCell.ASSEMBLY_STATION.value,
             'goal': WorkCell.QA_STATION.value,
             'status': TaskStatus.BACKLOG.value,
         },

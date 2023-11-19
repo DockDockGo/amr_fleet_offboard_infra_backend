@@ -26,27 +26,17 @@ from django.db.models import Q
 #     MORTY = 2
 
 
-# # Dictionary mapping workcell to int type dock ids
-# # For now, we use the same fiducial marker id as the dock id
-# WORKCELL_TO_DOCK_IDS = {
-#     WorkCell.STOCK_ROOM: 1,
-#     WorkCell.KITTING_STATION: 2,
-#     WorkCell.ASSEMBLY_STATION_1: 3,
-#     WorkCell.ASSEMBLY_STATION_2: 4,
-#     WorkCell.QA_STATION: 5,
-# }
-
 
 class WorkCellState(models.Model):
-    workcell_id = models.CharField(
-        max_length=20, choices=[(tag, tag.value) for tag in WorkCell]
+    workcell_id = models.IntegerField(
+        choices=[(tag.value, tag.name) for tag in WorkCell]
     )
     active_task = models.OneToOneField(
         "TestbedTask", on_delete=models.PROTECT, null=True, blank=True
     )
     # add a field for the AMR id that is currently docked at this workcell
-    docked_amr_id = models.CharField(
-        max_length=20, choices=[(tag, tag.value) for tag in AMR], null=True, blank=True
+    docked_amr_id = models.IntegerField(
+        choices=[(tag.value, tag.name) for tag in AMR], null=True, blank=True
     )
 
     def __str__(self):
@@ -55,21 +45,29 @@ class WorkCellState(models.Model):
 
 
 class AMRState(models.Model):
-    amr_id = models.CharField(max_length=20, choices=[(tag, tag.value) for tag in AMR], null=True, blank=True)
+    amr_id = models.IntegerField(choices=[(tag.value, tag.name) for tag in AMR], null=True, blank=True, unique=True)
     active_mission = models.OneToOneField(
         "AMRMission", on_delete=models.PROTECT, null=True, blank=True
     )
+    active_material_transport_task_chain = models.OneToOneField(
+        "MaterialTransportTaskChain", on_delete=models.PROTECT, null=True, blank=True
+    )
+
+    @property
+    def is_idle(self):
+        return self.active_mission is None and self.active_material_transport_task_chain is None
 
     def __str__(self):
         active_mission_str = f"{self.active_mission}" if self.active_mission else "None"
-        return f"AMRState for amr_id: {self.amr_id} <active_mission: {active_mission_str}>"
+        active_material_transport_task_chain_str = f"{self.active_material_transport_task_chain}" if self.active_material_transport_task_chain else "None"
+        return f"AMRState for amr_id: {self.amr_id} <active_mission: {active_mission_str}> <active_material_transport_task_chain: {active_material_transport_task_chain_str}>"
 
 
 
 class Task(models.Model):
-    assembly_workflow_id = models.IntegerField()
-    status = models.CharField(
-        max_length=20, choices=[(tag, tag.value) for tag in TaskStatus], default=TaskStatus.BACKLOG.value
+    assembly_workflow_id = models.IntegerField(null=True, blank=True)
+    material_transport_task_chain_id = models.IntegerField(null=True, blank=True)
+    status = models.IntegerField(choices=[(tag.value, tag.name) for tag in TaskStatus], default=TaskStatus.BACKLOG.value
     )
     # Creation and update time fields
     created_at = models.DateTimeField(auto_now_add=True)
@@ -117,25 +115,22 @@ class Task(models.Model):
 
 
 class TestbedTask(Task):
-    workcell_id = models.CharField(
-        max_length=20, choices=[(tag, tag.value) for tag in WorkCell]
+    workcell_id = models.IntegerField(choices=[(tag.value, tag.name) for tag in WorkCell]
     )
 
     def __str__(self):
-        return f"TestbedTask: {self.assembly_workflow_id} <status: {self.status}, workcell_id: {self.workcell_id}>"
+        return f"TestbedTask: {self.id} <status: {self.status}, workcell_id: {self.workcell_id}, assembly_workflow_id: {self.assembly_workflow_id}, material_transport_task_chain_id: {self.material_transport_task_chain_id}>>"
 
 
 class AMRMission(Task):
-    amr_id = models.CharField(max_length=20, choices=[(tag, tag.value) for tag in AMR], null=True, blank=True)
-    start = models.CharField(
-        max_length=20, choices=[(tag, tag.value) for tag in WorkCell]
+    amr_id = models.IntegerField(choices=[(tag.value, tag.name) for tag in AMR], null=True, blank=True)
+    start = models.IntegerField(choices=[(tag.value, tag.name) for tag in WorkCell]
     )
-    goal = models.CharField(
-        max_length=20, choices=[(tag, tag.value) for tag in WorkCell]
+    goal = models.IntegerField(choices=[(tag.value, tag.name) for tag in WorkCell]
     )
 
     def __str__(self):
-        return f"AMRMission: {self.assembly_workflow_id} <status: {self.status}, amr_id: {self.amr_id}, start: {self.start}, goal: {self.goal}>"
+        return f"AMRMission: {self.id} <status: {self.status}, amr_id: {self.amr_id}, start: {self.start}, goal: {self.goal}, assembly_workflow_id: {self.assembly_workflow_id}, material_transport_task_chain_id: {self.material_transport_task_chain_id}>"
 
 # MaterialTransportTaskChain represents a chain of tasks:
 # 1. An AMR mission called NavigateToSourceSubTask that represents the AMR navigating to the source workcell
@@ -177,7 +172,7 @@ class MaterialTransportTaskChain(models.Model):
         navigate_to_sink_subtask_str = f"{self.navigate_to_sink_subtask}" if self.navigate_to_sink_subtask else "None"
         unloading_subtask_str = f"{self.unloading_subtask}" if self.unloading_subtask else "None"
 
-        return f"MaterialTransportTaskChain: {self.assembly_workflow_id} <status: {self.status}, navigate_to_source_subtask: {navigate_to_source_subtask_str}, loading_subtask: {loading_subtask_str}, navigate_to_sink_subtask: {navigate_to_sink_subtask_str}, unloading_subtask: {unloading_subtask_str}>"
+        return f"MaterialTransportTaskChain: {self.id} <assembly_workflow_id: {self.assembly_workflow_id}, status: {self.status}, navigate_to_source_subtask: {navigate_to_source_subtask_str}, loading_subtask: {loading_subtask_str}, navigate_to_sink_subtask: {navigate_to_sink_subtask_str}, unloading_subtask: {unloading_subtask_str}>"
 
     def query_assembly_workflow_id(self):
         if self.transport_parts_bins_to_kitting_station_assembly_workflow:

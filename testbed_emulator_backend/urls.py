@@ -17,10 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from testbed_emulator_backend_app.views import AssemblyWorkflowViewSet
+from testbed_emulator_backend_app.views import AssemblyWorkflowViewSet, WorkCellStateViewSet, AMRStateViewSet, TestbedTaskViewSet, MaterialTransportTaskChainViewSet, AMRMissionViewSet
 
 router = DefaultRouter()
-router.register(r'assembly-workflows', AssemblyWorkflowViewSet)
+router.register(r'assembly-workflows', AssemblyWorkflowViewSet, basename='assemblyworkflow')
+router.register(r'workcellstates', WorkCellStateViewSet, basename='workcellstate')
+router.register(r'amrstates', AMRStateViewSet, basename='amrstate')
+router.register(r'testbedtasks', TestbedTaskViewSet, basename='testbedtask')
+router.register(r'amrmissions', AMRMissionViewSet, basename='amrmission')
+router.register(r'materialtransporttaskchains', MaterialTransportTaskChainViewSet, basename='materialtransporttaskchain')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

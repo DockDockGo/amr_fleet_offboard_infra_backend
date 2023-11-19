@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-x+2e+4$xa53*r7i)$ml3(xa934s()wxg0a4b_p-g!9f+xp&4lo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '192.168.1.7']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework',
+    'django_filters',
     'testbed_emulator_backend_app',
 ]
 
@@ -79,7 +80,7 @@ WSGI_APPLICATION = 'testbed_emulator_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'testbed_emulator_2023_11_14',
+        'NAME': 'testbed_emulator_2023_11_18_v2',
         'USER': 'sid',
         'PASSWORD': 'mrsd',
         'HOST': 'localhost',   # Set to the address of your PostgreSQL
@@ -128,3 +129,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    # Other DRF settings...
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+}
