@@ -104,3 +104,11 @@ python manage.py migrate
 ```
 **Important**: Ensure that these migrations apply successfully.
 
+## Running the Django server
+
+The installation steps above only need to be executed once. In order to run the django server for the webapp, navigate to the cloned repo directory and execute:
+```
+source venv/bin/activate;
+gunicorn testbed_emulator_backend.wsgi -b <you-ip-address>:8000 --threads 10
+```
+replacing <your-ip-address> with the appropriate value for the discoverable ip address of your machine on mfi's NETGEAR-5G / NETGEAR network. (starts with 192.*). This will launch the django server on port 8000 of your machine.
