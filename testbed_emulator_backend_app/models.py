@@ -2,30 +2,6 @@ from django.db import models
 from .testbed_config import AMR, TaskStatus, WorkCell, TestbedTaskType, AssemblyType
 from django.db.models import Q
 
-# # A work cell is a physical location in the factory where a robot can be assigned to perform a task
-# class WorkCell(Enum):
-#     STOCK_ROOM = 1
-#     KITTING_STATION = 2
-#     ASSEMBLY_STATION_1 = 3
-#     ASSEMBLY_STATION_2 = 4
-#     QA_STATION = 5
-
-
-# class TaskStatus(Enum):
-#     BACKLOG = 1
-#     ENQUEUED = 2
-#     RUNNING = 3
-#     COMPLETED = 4
-#     FAILED = 5
-#     CANCELED = 6
-
-
-# # An AMR is an autonomous mobile robot. We currently have the following 2 robots at the testbed
-# class AMR(Enum):
-#     RICK = 1
-#     MORTY = 2
-
-
 
 class WorkCellState(models.Model):
     workcell_id = models.IntegerField(
@@ -210,40 +186,3 @@ class AssemblyWorkflow(models.Model):
         transport_assembly_task_payload_to_qa_station_str = f"{self.transport_assembly_task_payload_to_qa_station}" if self.transport_assembly_task_payload_to_qa_station else "None"
 
         return f"AssemblyWorkflow: {self.id} <status: {self.status}, fetch_parts_bins: {fetch_parts_bins_str}, transport_parts_bins_to_kitting_station: {transport_parts_bins_to_kitting_station_str}, kitting_task: {kitting_task_str}, transport_kitting_task_payload_to_assembly_station: {transport_kitting_task_payload_to_assembly_station_str}, assembly_task: {assembly_task_str}, transport_assembly_task_payload_to_qa_station: {transport_assembly_task_payload_to_qa_station_str}>"
-
-
-
-
-####### snippets
-
-# from Task model definition
-    #    
-    # def query_assembly_workflow_id(self):
-    #     # Check for direct relation to AssemblyWorkflow
-    #     direct_related_workflow = AssemblyWorkflow.objects.filter(
-    #         Q(fetch_parts_bins=self) |
-    #         Q(kitting_task=self) |
-    #         Q(assembly_task=self)
-    #     ).first()
-
-    #     if direct_related_workflow:
-    #         return direct_related_workflow.id
-
-    #     # Check relation through MaterialTransportTaskChain
-    #     # This part assumes that Task is related to MaterialTransportTaskChain via a OneToOneField or ForeignKey
-    #     related_task_chains = MaterialTransportTaskChain.objects.filter(
-    #         Q(navigate_to_source_subtask=self) |
-    #         Q(loading_subtask=self) |
-    #         Q(navigate_to_sink_subtask=self) |
-    #         Q(unloading_subtask=self)
-    #     )
-
-    #     for task_chain in related_task_chains:
-    #         # Traverse to AssemblyWorkflow
-    #         if task_chain.transport_parts_bins_to_kitting_station_assembly_workflow:
-    #             return task_chain.transport_parts_bins_to_kitting_station_assembly_workflow.id
-    #         if task_chain.transport_kitting_task_payload_to_assembly_station_assembly_workflow:
-    #             return task_chain.transport_kitting_task_payload_to_assembly_station_assembly_workflow.id
-    #         if task_chain.transport_assembly_task_payload_to_qa_station_assembly_workflow:
-    #             return task_chain.transport_assembly_task_payload_to_qa_station_assembly_workflow.id
-    # return None  # Or appropriate default value
