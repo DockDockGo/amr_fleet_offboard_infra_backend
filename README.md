@@ -12,7 +12,7 @@ To run this project, you need to set up a Python virtual environment and install
 - pip (Python package installer)
 - postgres (See instructions below)
 
-### Steps
+### Installation steps
 
 #### Postgres
 
@@ -95,4 +95,12 @@ To install PostgreSQL on Ubuntu, you can follow these steps:
   ```
   pip install -r requirements.txt
   ```
+
+#### Migrate Django models to postgres instance
+
+Run the following command to deploy django model migrations to the newly created postgres db instance:
+```
+python manage.py migrate
+```
+**Important**: Ensure that these migrations apply successfully.
 
