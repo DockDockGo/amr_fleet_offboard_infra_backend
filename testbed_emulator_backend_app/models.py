@@ -1,5 +1,5 @@
 from django.db import models
-from .testbed_config import AMR, TaskStatus, WorkCell
+from .testbed_config import AMR, TaskStatus, WorkCell, TestbedTaskType, AssemblyType
 from django.db.models import Q
 
 # # A work cell is a physical location in the factory where a robot can be assigned to perform a task
@@ -78,37 +78,6 @@ class Task(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
 
-    def query_assembly_workflow_id(self):
-        # Check for direct relation to AssemblyWorkflow
-        direct_related_workflow = AssemblyWorkflow.objects.filter(
-            Q(fetch_parts_bins=self) |
-            Q(kitting_task=self) |
-            Q(assembly_task=self)
-        ).first()
-
-        if direct_related_workflow:
-            return direct_related_workflow.id
-
-        # Check relation through MaterialTransportTaskChain
-        # This part assumes that Task is related to MaterialTransportTaskChain via a OneToOneField or ForeignKey
-        related_task_chains = MaterialTransportTaskChain.objects.filter(
-            Q(navigate_to_source_subtask=self) |
-            Q(loading_subtask=self) |
-            Q(navigate_to_sink_subtask=self) |
-            Q(unloading_subtask=self)
-        )
-
-        for task_chain in related_task_chains:
-            # Traverse to AssemblyWorkflow
-            if task_chain.transport_parts_bins_to_kitting_station_assembly_workflow:
-                return task_chain.transport_parts_bins_to_kitting_station_assembly_workflow.id
-            if task_chain.transport_kitting_task_payload_to_assembly_station_assembly_workflow:
-                return task_chain.transport_kitting_task_payload_to_assembly_station_assembly_workflow.id
-            if task_chain.transport_assembly_task_payload_to_qa_station_assembly_workflow:
-                return task_chain.transport_assembly_task_payload_to_qa_station_assembly_workflow.id
-
-        return None  # Or appropriate default value
-
     # Abstract base class
     class Meta:
         abstract = True
@@ -117,6 +86,9 @@ class Task(models.Model):
 class TestbedTask(Task):
     workcell_id = models.IntegerField(choices=[(tag.value, tag.name) for tag in WorkCell]
     )
+    testbed_task_type = models.IntegerField(choices=[(tag.value, tag.name) for tag in TestbedTaskType], null = True, blank = True
+    )
+    assembly_type_id = models.IntegerField(choices=[(tag.value, tag.name) for tag in AssemblyType], null=True, blank=True)
 
     def __str__(self):
         return f"TestbedTask: {self.id} <status: {self.status}, workcell_id: {self.workcell_id}, assembly_workflow_id: {self.assembly_workflow_id}, material_transport_task_chain_id: {self.material_transport_task_chain_id}>>"
@@ -238,3 +210,40 @@ class AssemblyWorkflow(models.Model):
         transport_assembly_task_payload_to_qa_station_str = f"{self.transport_assembly_task_payload_to_qa_station}" if self.transport_assembly_task_payload_to_qa_station else "None"
 
         return f"AssemblyWorkflow: {self.id} <status: {self.status}, fetch_parts_bins: {fetch_parts_bins_str}, transport_parts_bins_to_kitting_station: {transport_parts_bins_to_kitting_station_str}, kitting_task: {kitting_task_str}, transport_kitting_task_payload_to_assembly_station: {transport_kitting_task_payload_to_assembly_station_str}, assembly_task: {assembly_task_str}, transport_assembly_task_payload_to_qa_station: {transport_assembly_task_payload_to_qa_station_str}>"
+
+
+
+
+####### snippets
+
+# from Task model definition
+    #    
+    # def query_assembly_workflow_id(self):
+    #     # Check for direct relation to AssemblyWorkflow
+    #     direct_related_workflow = AssemblyWorkflow.objects.filter(
+    #         Q(fetch_parts_bins=self) |
+    #         Q(kitting_task=self) |
+    #         Q(assembly_task=self)
+    #     ).first()
+
+    #     if direct_related_workflow:
+    #         return direct_related_workflow.id
+
+    #     # Check relation through MaterialTransportTaskChain
+    #     # This part assumes that Task is related to MaterialTransportTaskChain via a OneToOneField or ForeignKey
+    #     related_task_chains = MaterialTransportTaskChain.objects.filter(
+    #         Q(navigate_to_source_subtask=self) |
+    #         Q(loading_subtask=self) |
+    #         Q(navigate_to_sink_subtask=self) |
+    #         Q(unloading_subtask=self)
+    #     )
+
+    #     for task_chain in related_task_chains:
+    #         # Traverse to AssemblyWorkflow
+    #         if task_chain.transport_parts_bins_to_kitting_station_assembly_workflow:
+    #             return task_chain.transport_parts_bins_to_kitting_station_assembly_workflow.id
+    #         if task_chain.transport_kitting_task_payload_to_assembly_station_assembly_workflow:
+    #             return task_chain.transport_kitting_task_payload_to_assembly_station_assembly_workflow.id
+    #         if task_chain.transport_assembly_task_payload_to_qa_station_assembly_workflow:
+    #             return task_chain.transport_assembly_task_payload_to_qa_station_assembly_workflow.id
+    # return None  # Or appropriate default value

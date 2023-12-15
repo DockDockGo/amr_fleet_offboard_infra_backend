@@ -3,6 +3,7 @@ from .models import AssemblyWorkflow, TestbedTask, MaterialTransportTaskChain, A
 from .testbed_config import WorkCell, TaskStatus, AMR, ASSEMBLY_WORKFLOW_PRESET
 
 class AssemblyWorkflowSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     model_assembly_type_id = serializers.IntegerField()
 
     class Meta:
@@ -92,6 +93,7 @@ class AssemblyWorkflowSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class WorkCellStateSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     workcell_id = serializers.CharField()
     docked_amr_id = serializers.CharField()
 
@@ -106,6 +108,7 @@ class WorkCellStateSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AMRStateSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     amr_id = serializers.CharField()
 
     class Meta:
@@ -117,10 +120,13 @@ class AMRStateSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 class TestbedTaskSerializer(serializers.HyperlinkedModelSerializer):
-    status = serializers.CharField()
+    id = serializers.ReadOnlyField()
+    status = serializers.IntegerField()
     assembly_workflow_id = serializers.IntegerField(allow_null=True, required=False)
-    workcell_id = serializers.CharField()
+    workcell_id = serializers.IntegerField()
+    testbed_task_type = serializers.IntegerField()
     material_transport_task_chain_id = serializers.IntegerField(allow_null=True, required=False)
+    assembly_type_id = serializers.IntegerField(allow_null=True, required=False)
 
 
     class Meta:
@@ -132,6 +138,7 @@ class TestbedTaskSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 class AMRMissionSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     amr_id = serializers.IntegerField(allow_null=True, required=False)
     assembly_workflow_id = serializers.IntegerField(allow_null=True, required=False)
     start = serializers.IntegerField()
@@ -150,6 +157,7 @@ class AMRMissionSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 class MaterialTransportTaskChainSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
     class Meta:
         model = MaterialTransportTaskChain
         fields = '__all__'

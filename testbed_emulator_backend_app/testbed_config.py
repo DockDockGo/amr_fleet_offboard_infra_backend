@@ -1,7 +1,5 @@
 from enum import Enum
 
-FLEET_INFRA_IP_AND_PORT = "0.0.0.0:5001"
-
 # A work cell is a physical location in the factory where a robot can be assigned to perform a task
 class WorkCell(Enum):
     UNDEFINED = 0
@@ -9,6 +7,8 @@ class WorkCell(Enum):
     KITTING_STATION = 6
     ASSEMBLY_STATION = 1
     QA_STATION = 2
+    STOCK_ROOM_2 = 4
+    ASSEMBLY_STATION_2 = 5
 
 
 class TaskStatus(Enum):
@@ -24,6 +24,18 @@ class TaskStatus(Enum):
 class AMR(Enum):
     RICK = 1
     MORTY = 2
+
+
+class TestbedTaskType(Enum):
+    UNLOADING = 1
+    PROCESSING = 2
+    LOADING = 3
+
+
+class AssemblyType(Enum):
+    M = 1
+    F = 2
+    I = 3
 
 
 ASSEMBLY_WORKFLOW_PRESET = {

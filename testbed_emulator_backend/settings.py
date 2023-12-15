@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-x+2e+4$xa53*r7i)$ml3(xa934s()wxg0a4b_p-g!9f+xp&4lo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', '192.168.1.7']
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '192.168.0.177', '*']
 
 
 # Application definition
@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'testbed_emulator_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'testbed_emulator_2023_11_18_v2',
+        'NAME': 'testbed_emulator_2023_11_19_v1',
         'USER': 'sid',
         'PASSWORD': 'mrsd',
         'HOST': 'localhost',   # Set to the address of your PostgreSQL
