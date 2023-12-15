@@ -96,7 +96,7 @@ To install PostgreSQL on Ubuntu, you can follow these steps:
   pip install -r requirements.txt
   ```
 
-#### Migrate Django models to postgres instance
+### Migrate Django models to postgres instance
 
 Run the following command to deploy django model migrations to the newly created postgres db instance:
 ```
