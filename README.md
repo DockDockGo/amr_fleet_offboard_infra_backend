@@ -54,6 +54,8 @@ To install PostgreSQL on Ubuntu, you can follow these steps:
   ```
   GRANT ALL PRIVILEGES ON DATABASE testbed_emulator_2023_12_15 TO mfi;
   ```
+4. Ensure that this newly created database name, user and password match the project settings in https://github.com/siddhantwadhwa/testbed_emulator_backend/blob/98b826921d837b10147dac8daef453ceac379e48/testbed_emulator_backend/settings.py#L80
+  
 5. Restart postgres to reflect these changes:
   ```
   sudo systemctl restart postgresql
