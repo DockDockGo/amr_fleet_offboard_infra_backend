@@ -69,8 +69,8 @@ To install PostgreSQL on Ubuntu, you can follow these steps:
    First, clone the repository to your local machine using git:
 
    ```
-   git clone [Your Repository URL]
-   cd [Your Repository Name]
+   git clone git@github.com:DockDockGo/testbed_emulator_backend.git
+   cd testbed_emulator_backend
    ```
 
 2. **Create a Virtual Environment**
