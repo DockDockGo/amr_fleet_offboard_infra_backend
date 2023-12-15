@@ -70,7 +70,7 @@ To install PostgreSQL on Ubuntu, you can follow these steps:
 
    ```
    git clone git@github.com:DockDockGo/amr_fleet_offboard_infra_backend.git
-   cd testbed_emulator_backend
+   cd amr_fleet_offboard_infra_backend
    ```
 
 2. **Create a Virtual Environment**
